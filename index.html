@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <title>{page title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container text-center my-5">
+    <div class="d-flex justify-content-end mb-3">
+        <button id="themeToggleBtn" class="btn btn-outline-secondary" style="border-radius: 99px">💻</button>
+    </div>
+    <h1>{page title}</h1>
+
+    {main HTML content}
+
+    <!-- footer -->
+    <div class="mt-5">{pithy closing line} 🌯❤️</div>
+    <a href="https://burrito.monster" target="_blank">burrito.monster</a>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</div>
+
+
+<script type="application/javascript">
+    // All JS goes here
+
+  //dark mode toggle
+  document.addEventListener('DOMContentLoaded', function () {
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const htmlElement = document.documentElement;
+
+    let currentTheme = localStorage.getItem('theme') || 'system';
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme() {
+      if (currentTheme === 'dark') {
+        htmlElement.setAttribute('data-bs-theme', 'dark');
+        themeToggleBtn.innerText = '🌙';
+      } else if (currentTheme === 'light') {
+        htmlElement.setAttribute('data-bs-theme', 'light');
+        themeToggleBtn.innerText = '☀️';
+      } else {
+        htmlElement.setAttribute('data-bs-theme', systemPrefersDark.matches ? 'dark' : 'light');
+        themeToggleBtn.innerText = '💻';
+      }
+    }
+
+    applyTheme();
+
+    themeToggleBtn.addEventListener('click', function () {
+      if (currentTheme === 'light') {
+        currentTheme = 'dark';
+        localStorage.setItem('theme', 'dark');
+      } else if (currentTheme === 'dark') {
+        currentTheme = 'system';
+        localStorage.removeItem('theme');
+      } else {
+        currentTheme = 'light';
+        localStorage.setItem('theme', 'light');
+      }
+      applyTheme();
+    });
+
+    // Listen for system theme changes
+    systemPrefersDark.addEventListener('change', function (e) {
+      if (currentTheme === 'system') {
+        applyTheme();
+      }
+    });
+  });
+</script>
+</body>
+</html>
