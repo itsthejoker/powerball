@@ -1,30 +1,343 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
 <head>
-    <meta charset="UTF-8">
-    <title>{page title}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <title>Powerball</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          crossorigin="anonymous"></script>
+  <style>
+    #winLog div:nth-child(1) {
+      opacity: 1;
+    }
+
+    #winLog div:nth-child(2) {
+      opacity: 0.7;
+    }
+
+    #winLog div:nth-child(3) {
+      opacity: 0.5;
+    }
+
+    #winLog div:nth-child(4) {
+      opacity: 0.3;
+    }
+
+    #winLog div:nth-child(5) {
+      opacity: 0.1;
+    }
+
+    #winLog div:nth-child(n+6) {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-<div class="container text-center my-5">
-    <div class="d-flex justify-content-end mb-3">
-        <button id="themeToggleBtn" class="btn btn-outline-secondary" style="border-radius: 99px">💻</button>
+
+<div aria-live="polite" aria-atomic="true" class="bg-body-secondary position-relative bd-example-toasts rounded-3">
+  <div class="toast-container p-0 top-0 start-50 translate-middle-x">
+    <div class="toast align-items-center text-bg-danger border-0">
+      <div class="toast-body text-center">
+        Something's not right with your numbers...
+      </div>
     </div>
-    <h1>{page title}</h1>
+  </div>
+</div>
 
-    {main HTML content}
+<div class="container text-center my-5">
+  <div class="d-flex justify-content-end mb-3">
+    <button id="themeToggleBtn" class="btn btn-outline-secondary" style="border-radius: 99px">💻</button>
+  </div>
+  <h1>Powerball</h1>
+  <p class="mt-3">
+    Want to know what playing the Powerball is <em>really</em> like? Play by picking
+    your bets below.
+    <br><br>The <strong>first five numbers</strong> must be between
+    <strong>1 and 69</strong>.
+    <br>The last number, the <strong>Powerball</strong>,
+    must be between <strong>1 and 26</strong>.
+  </p>
+  <div class="row justify-content-evenly">
+    <div class="col-lg-6 col-xl-4 col-md-8 col12">
+      <div class="input-group">
+        <input id="first" type="number" aria-label="first" class="form-control" min="1" max="69">
+        <input id="second" type="number" aria-label="second" class="form-control" min="1" max="69">
+        <input id="third" type="number" aria-label="third" class="form-control" min="1" max="69">
+        <input id="fourth" type="number" aria-label="fourth" class="form-control" min="1" max="69">
+        <input id="fifth" type="number" aria-label="fifth" class="form-control" min="1" max="69">
+        <span class="input-group-text">PB</span>
+        <input id="pb" type="number" aria-label="PB" class="form-control" min="1" max="26">
+      </div>
+    </div>
+  </div>
 
-    <!-- footer -->
-    <div class="mt-5">{pithy closing line} 🌯❤️</div>
-    <a href="https://burrito.monster" target="_blank">burrito.monster</a>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <div class="row justify-content-evenly d-none" id="powerball">
+    <div class="col-lg-6 col-xl-4 col-md-8 col12">
+      <div class="input-group">
+        <input id="pfirst" type="number" aria-label="first" disabled class="form-control">
+        <input id="psecond" type="number" aria-label="second" disabled class="form-control">
+        <input id="pthird" type="number" aria-label="third" disabled class="form-control">
+        <input id="pfourth" type="number" aria-label="fourth" disabled class="form-control">
+        <input id="pfifth" type="number" aria-label="fifth" disabled class="form-control">
+        <span class="input-group-text">PB</span>
+        <input id="ppb" type="number" aria-label="PB" disabled class="form-control">
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-3">Every ticket costs $2. The jackpot is <strong>$87 million.</strong></p>
+  <p class="fs-2">You have <strong><span id="cash">$20</span></strong>.</p>
+
+  <div id="gameCountEl" class="d-none"><span id="gameCount">0</span> games played so far...</div>
+  <div id="winAmountEl" class="d-none">You've won $<span id="winAmount">0</span> total.</div>
+  <div id="winLog" class="mt-2 d-none" style="min-height: 100px;"></div>
+  <button id="statsBtn" class="btn btn-sm btn-link d-none mt-2" data-bs-toggle="modal" data-bs-target="#statsModal">show
+    me the stats
+  </button>
+
+  <div id="goBtn" class="btn btn-lg btn-success bg-gradient" onclick="play()">LET'S GO</div>
+
+  <!-- Stats Modal -->
+  <div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="statsModalLabel">Powerball Odds</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-start">
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>Match</th>
+              <th>Prize</th>
+              <th>Odds 1 in</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>5+PB</td>
+              <td>$87,000,000</td>
+              <td>292,201,338</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>$1,000,000</td>
+              <td>11,688,054</td>
+            </tr>
+            <tr>
+              <td>4+PB</td>
+              <td>$50,000</td>
+              <td>913,129</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>$100</td>
+              <td>36,525</td>
+            </tr>
+            <tr>
+              <td>3+PB</td>
+              <td>$100</td>
+              <td>14,494</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>$7</td>
+              <td>580</td>
+            </tr>
+            <tr>
+              <td>2+PB</td>
+              <td>$7</td>
+              <td>701</td>
+            </tr>
+            <tr>
+              <td>1+PB</td>
+              <td>$4</td>
+              <td>92</td>
+            </tr>
+            <tr>
+              <td>0+PB</td>
+              <td>$4</td>
+              <td>38</td>
+            </tr>
+            </tbody>
+          </table>
+          <p class="small mb-0">Approximate overall odds of winning are 1 in 24.87.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div class="mt-5">May the odds be ever in your favor. 🌯❤️</div>
+  <a href="https://burrito.monster" target="_blank">burrito.monster</a>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </div>
 
 
 <script type="application/javascript">
-    // All JS goes here
+  // All JS goes here
+  document.addEventListener('DOMContentLoaded', function () {
+    const toastElList = document.querySelectorAll('.toast')
+    window.toastList = [...toastElList].map(toastEl => new bootstrap.Toast(toastEl, {}))
+  })
+
+  function randInt(min, max) {
+    // this horrifying thing is courtesy of the MDN.
+    // why does JS suck so much
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled);
+  }
+
+  let cash = 20;
+  let gamesPlayed = 0;
+  let totalWon = 0;
+  let jackpot = false;
+  let uservals = [];
+  const celebrateEmojis = ["🎉", "🥳", "🎊", "🌟", "✨"]
+  const cashDisplay = document.getElementById("cash");
+  const gameCountEl = document.getElementById("gameCountEl");
+  const gameCountDisplay = document.getElementById("gameCount");
+  const winAmountEl = document.getElementById("winAmountEl");
+  const winAmountDisplay = document.getElementById("winAmount");
+  const winLog = document.getElementById("winLog");
+  const powerballDisplay = document.getElementById("powerball");
+  const decrementCash = () => {
+    cash -= 2;
+    cashDisplay.textContent = cash < 0 ? `-$${Math.abs(cash)}` : `$${cash}`
+    cashDisplay.style.color = cash < 0 ? "#FF0000" : "#000"
+  }
+  const elIds = ["first", "second", "third", "fourth", "fifth", "pb"]
+  const pEls = [
+    document.getElementById("pfirst"),
+    document.getElementById("psecond"),
+    document.getElementById("pthird"),
+    document.getElementById("pfourth"),
+    document.getElementById("pfifth"),
+    document.getElementById("ppb")
+  ]
+  let pVals = [0, 0, 0, 0, 0, 0]
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const isWin = () => {
+    // Use the table in the Readme. Values can be in any order.
+    // If a win is detected, update the cash value by the winning amount.
+    // If a cell fulfills a winning condition, set the background of the
+    // cell green. Otherwise, none.
+    const userNumbers = uservals.slice(0, 5);
+    const userPB = uservals[5];
+    const drawnNumbers = pVals.slice(0, 5);
+    const drawnPB = pVals[5];
+
+    let matches = 0;
+    const drawnNumbersCopy = [...drawnNumbers];
+
+    pEls.forEach(el => el.style.backgroundColor = "");
+
+    userNumbers.forEach(num => {
+      const index = drawnNumbersCopy.indexOf(num);
+      if (index !== -1) {
+        matches++;
+        drawnNumbersCopy.splice(index, 1);
+      }
+    });
+
+    // Highlight matches in the drawn numbers display
+    uservals.slice(0, 5).forEach(num => {
+      for (let i = 0; i < 5; i++) {
+        if (pVals[i] === num && pEls[i].style.backgroundColor !== "green") {
+          if (!reducedMotion) {
+            pEls[i].style.backgroundColor = "green";
+          }
+          break;
+        }
+      }
+    });
+
+    const pbMatch = userPB === drawnPB;
+    if (pbMatch && !reducedMotion) {
+      pEls[5].style.backgroundColor = "green";
+    }
+
+    let winAmount = 0;
+    if (matches === 5 && pbMatch) {
+      winAmount = 87000000; // Jackpot
+      jackpot = true;
+    } else if (matches === 5) {
+      winAmount = 1000000;
+    } else if (matches === 4 && pbMatch) {
+      winAmount = 50000;
+    } else if (matches === 4) {
+      winAmount = 100;
+    } else if (matches === 3 && pbMatch) {
+      winAmount = 100;
+    } else if (matches === 3) {
+      winAmount = 7;
+    } else if (matches === 2 && pbMatch) {
+      winAmount = 7;
+    } else if (matches === 1 && pbMatch) {
+      winAmount = 4;
+    } else if (0 === matches && pbMatch) {
+      winAmount = 4;
+    }
+
+    if (winAmount > 0) {
+      cash += winAmount;
+      totalWon += winAmount;
+      cashDisplay.textContent = cash < 0 ? `-$${Math.abs(cash)}` : `$${cash}`
+      cashDisplay.style.color = cash < 0 ? "#FF0000" : "#000"
+      winAmountDisplay.textContent = totalWon.toLocaleString();
+
+      const winEntry = document.createElement("div");
+      winEntry.textContent = `You won $${winAmount.toLocaleString()}! ${celebrateEmojis[Math.floor(Math.random() * celebrateEmojis.length)]}`;
+      winLog.prepend(winEntry);
+
+      while (winLog.children.length > 10) {
+        winLog.lastElementChild.remove();
+      }
+    }
+  }
+
+  const pick = () => {
+    for (let i = 0; i < 5; i++) {
+      pVals[i] = randInt(1, 69);
+      pEls[i].value = pVals[i].toString()
+    }
+    pVals[5] = randInt(1, 26);
+    pEls[5].value = pVals[5].toString()
+  }
+
+  function runGame() {
+    gamesPlayed++;
+    gameCountDisplay.textContent = gamesPlayed.toString();
+    decrementCash()
+    pick()
+    isWin()
+    if (!jackpot) {
+      requestAnimationFrame(runGame);
+    }
+  }
+
+  function play() {
+    uservals = elIds.map(id => parseInt(document.getElementById(id).value))
+
+    if (uservals.some(isNaN)) {
+      window.toastList[0].show()
+      return
+    }
+
+    document.getElementById("goBtn").style.display = "none"
+    powerballDisplay.classList.remove("d-none")
+    gameCountEl.classList.remove("d-none")
+    winAmountEl.classList.remove("d-none")
+    winLog.classList.remove("d-none")
+    document.getElementById("statsBtn").classList.remove("d-none")
+
+    requestAnimationFrame(runGame);
+  }
 
   //dark mode toggle
   document.addEventListener('DOMContentLoaded', function () {
